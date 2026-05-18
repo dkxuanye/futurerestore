@@ -57,6 +57,7 @@ static struct option longopts[] = {
         { "boot-args",                  required_argument,      nullptr, '9' },
         { "no-cache",                   no_argument,            nullptr, 'a' },
         { "skip-blob",                  no_argument,            nullptr, 'f' },
+        { "external-nonce",             no_argument,            nullptr, 'x' },
 #endif
         { nullptr, 0, nullptr, 0 }
 };
@@ -82,6 +83,7 @@ static struct option longopts[] = {
 #define FLAG_CUSTOM_LATEST_OTA      1 << 18
 #define FLAG_NO_RSEP_FR             1 << 19
 #define FLAG_IGNORE_BB_FAIL         1 << 20
+#define FLAG_EXTERNAL_NONCE         1 << 21
 
 bool manual = false;
 
@@ -114,6 +116,7 @@ void cmd_help(){
     printf("  -9, --boot-args\t\t\tSet custom restore boot-args(PROCEED WITH CAUTION)(requires use-pwndfu)\n");
     printf("  -a, --no-cache\t\t\tDisable cached patched iBSS/iBEC(requires use-pwndfu)\n");
     printf("  -f, --skip-blob\t\t\tSkip SHSH blob validation(PROCEED WITH CAUTION)(requires use-pwndfu)\n");
+    printf("  -x, --external-nonce\t\t\tUse ApNonce from APTicket and skip internal nonce hax(requires use-pwndfu)\n");
 #endif
 
     printf("\nOptions for SEP:\n");
@@ -187,7 +190,7 @@ int main_r(int argc, const char * argv[]) {
         return -1;
     }
 
-    while ((opt = getopt_long(argc, (char* const *)argv, "ht:b:p:s:m:c:g:ikwude0z123456789afj", longopts, &optindex)) > 0) {
+    while ((opt = getopt_long(argc, (char* const *)argv, "ht:b:p:s:m:c:g:ikwude0z123456789afjx", longopts, &optindex)) > 0) {
         switch (opt) {
             case 'h': // long option: "help"; can be called as short option
                 cmd_help();
@@ -282,6 +285,9 @@ int main_r(int argc, const char * argv[]) {
             case 'f': // long option: "skip-blob";
                 flags |= FLAG_SKIP_BLOB;
                 break;
+            case 'x': // long option: "external-nonce";
+                flags |= FLAG_EXTERNAL_NONCE;
+                break;
 #endif
             case 'e': // long option: "exit-recovery"; can be called as short option
                 exitRecovery = true;
@@ -342,6 +348,8 @@ int main_r(int argc, const char * argv[]) {
         retassure((flags & FLAG_IS_PWN_DFU),"--no-cache requires --use-pwndfu\n");
     if(flags & FLAG_SKIP_BLOB)
         retassure((flags & FLAG_IS_PWN_DFU),"--skip-blob requires --use-pwndfu\n");
+    if(flags & FLAG_EXTERNAL_NONCE)
+        retassure((flags & FLAG_IS_PWN_DFU),"--external-nonce requires --use-pwndfu\n");
     if(flags & FLAG_CUSTOM_LATEST_BETA)
         retassure((flags & FLAG_CUSTOM_LATEST_BUILDID),"-i, --custom-latest-beta requires -g, --custom-latest-buildid\n");
     if(flags & FLAG_CUSTOM_LATEST_OTA)
@@ -412,6 +420,9 @@ int main_r(int argc, const char * argv[]) {
 
         if(flags & FLAG_SKIP_BLOB) {
             client.skipBlobValidation();
+        }
+        if(flags & FLAG_EXTERNAL_NONCE) {
+            client.useExternalNonce();
         }
         if(!(flags & FLAG_SET_NONCE)) {
             if (flags & FLAG_LATEST_SEP) {

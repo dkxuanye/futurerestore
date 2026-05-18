@@ -60,6 +60,7 @@ class futurerestore {
     bool _isPwnDfu = false;
     bool _noIBSS = false;
     bool _setNonce = false;
+    bool _externalNonce = false;
     bool _serial = false;
     bool _noRestore = false;
     bool _noRSEP = false;
@@ -184,6 +185,7 @@ public:
     void setBasebandPath(std::string basebandPath) {_basebandPath = std::move(basebandPath);}
     void setBasebandManifestPath(std::string basebandManifestPath) {_basebandManifestPath = std::move(basebandManifestPath);}
     void setNonce(const char *custom_nonce){_custom_nonce = custom_nonce;};
+    void useExternalNonce(){_externalNonce = true;};
     void setBootArgs(const char *boot_args){_boot_args = boot_args;};
     void disableCache(){_noCache = true;};
     void skipBlobValidation(){_skipBlob = true;};
