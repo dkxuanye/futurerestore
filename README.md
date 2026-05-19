@@ -5,7 +5,7 @@
 >
 > This branch is maintained for Downr1n external-nonce laboratory validation. It experiments with a jailbreak-fixed `com.apple.System.boot-nonce` flow so futurerestore can use the APTicket IM4M BNCH as the already-fixed nonce source instead of performing the normal internal fresh-nonce patch path.
 >
-> The local validation build also used the companion `idevicerestore` compatibility patch saved at `patches/idevicerestore-libirecovery-1.3-compat.patch`.
+> This branch pins `external/idevicerestore` to the companion experimental fork at `https://github.com/dkxuanye/idevicerestore.git` on `experiment/libirecovery-1.3-compat`. The same compatibility patch is also kept at `patches/idevicerestore-libirecovery-1.3-compat.patch` as an audit reference.
 >
 > This branch is not intended to be merged into, pushed to, or proposed against the official futurerestore upstream/mainline. Treat it as an isolated research branch for controlled local testing only.
 
