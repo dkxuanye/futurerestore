@@ -42,5 +42,8 @@ require_contains "$impl" "External nonce mode enabled" "futurerestore must log t
 require_contains "$impl" "img4tool::getValFromIM4M({_im4ms[0].first, _im4ms[0].second}, 'BNCH')" "external nonce path must read BNCH from the APTicket IM4M"
 require_contains "$impl" "skip internal ApNonce hax" "external nonce path must skip futurerestore nonce hax"
 require_order "$impl" "External nonce mode enabled" "recovery_enter_restore" "external nonce must be established before entering restore mode"
+require_contains "$impl" "if (_externalNonce && !cache1 && !_noIBSS)" "external nonce mode must handle missing iBSS cache explicitly"
+require_contains "$impl" "external nonce mode needs a prebuilt patched iBSS cache" "missing external nonce iBSS cache must fail before libipatcher freshnonce patch"
+require_order "$impl" "external nonce mode needs a prebuilt patched iBSS cache" "libipatcher::patchiBSS" "external nonce cache guard must run before patchiBSS freshnonce path"
 
 echo "PASS: external nonce static checks"

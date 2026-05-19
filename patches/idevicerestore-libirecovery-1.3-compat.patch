@@ -1,0 +1,19 @@
+diff --git a/src/dfu.c b/src/dfu.c
+index 2ccab3d..e90c66c 100644
+--- a/src/dfu.c
++++ b/src/dfu.c
+@@ -89 +89 @@ int dfu_check_mode(struct idevicerestore_client_t* client, int* mode) {
+-	irecv_init();
++	/* libirecovery >= 1.3 no longer requires explicit global init */
+@@ -114 +114 @@ irecv_device_t dfu_get_irecv_device(struct idevicerestore_client_t* client)
+-	irecv_init();
++	/* libirecovery >= 1.3 no longer requires explicit global init */
+@@ -614 +613,0 @@ int dfu_enter_recovery(struct idevicerestore_client_t* client, plist_t build_ide
+-
+diff --git a/src/recovery.c b/src/recovery.c
+index 275c291..f7d1636 100644
+--- a/src/recovery.c
++++ b/src/recovery.c
+@@ -115 +115 @@ int recovery_check_mode(struct idevicerestore_client_t* client) {
+-	irecv_init();
++	/* libirecovery >= 1.3 no longer requires explicit global init */

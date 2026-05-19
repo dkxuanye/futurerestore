@@ -671,24 +671,33 @@ void futurerestore::enterPwnRecovery(plist_t build_identity, std::string bootarg
             if (board == "n71ap" || board == "n71map" || board == "n69ap" || board == "n69uap" || board == "n66ap" ||
                 board == "n66map") {
                 if (!_noIBSS && !cache1) {
-                    iBSSKeys = libipatcher::getFirmwareKey(_client->device->product_type, _client->build, "iBSS",
-                                                           board);
+                    iBSSKeys = libipatcher::getFirmwareKeyForComponent(_client->device->product_type, _client->build,
+                                                                        "iBSS");
                 }
                 if (!cache2) {
-                    iBECKeys = libipatcher::getFirmwareKey(_client->device->product_type, _client->build, "iBEC",
-                                                           board);
+                    iBECKeys = libipatcher::getFirmwareKeyForComponent(_client->device->product_type, _client->build,
+                                                                        "iBEC");
                 }
             } else {
                 if (!_noIBSS && !cache1) {
-                    iBSSKeys = libipatcher::getFirmwareKey(_client->device->product_type, _client->build, "iBSS");
+                    iBSSKeys = libipatcher::getFirmwareKeyForComponent(_client->device->product_type, _client->build,
+                                                                        "iBSS");
                 }
                 if (!cache2) {
-                    iBECKeys = libipatcher::getFirmwareKey(_client->device->product_type, _client->build, "iBEC");
+                    iBECKeys = libipatcher::getFirmwareKeyForComponent(_client->device->product_type, _client->build,
+                                                                        "iBEC");
                 }
             }
         } catch (tihmstar::exception &e) {
             reterror("getting keys failed with error: %d (%s). Are keys publicly available?", e.code(), e.what());
         }
+    }
+
+    if (_externalNonce && !cache1 && !_noIBSS) {
+        reterror("external nonce mode needs a prebuilt patched iBSS cache at %s before libipatcher freshnonce patch path", ibss_name.c_str());
+    }
+    if (_externalNonce && !cache2) {
+        reterror("external nonce mode needs a prebuilt patched iBEC cache at %s before entering restore mode", ibec_name.c_str());
     }
 
     if (!iBSS.first && !_noIBSS) {
@@ -994,9 +1003,9 @@ void get_custom_component(struct idevicerestore_client_t *client, plist_t build_
 #else
     try {
         auto comp = getIPSWComponent(client, build_identity, component);
-        comp = std::move(libipatcher::decryptFile3((char *) comp.first, comp.second,
-                                              libipatcher::getFirmwareKey(client->device->product_type, client->build,
-                                                                          component)));
+        comp = std::move(libipatcher::decryptFile((char *) comp.first, comp.second,
+                                              libipatcher::getFirmwareKeyForComponent(client->device->product_type,
+                                                                                      client->build, component)));
         *data = (unsigned char *) (char *) comp.first;
         *size = comp.second;
         comp.first = NULL; //don't free on destruction

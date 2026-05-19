@@ -1,6 +1,14 @@
 # futurerestore
 [![CI Building](https://img.shields.io/github/actions/workflow/status/futurerestore/futurerestore/ci.yml?branch=main&style=for-the-badge)](https://github.com/futurerestore/futurerestore/actions)
 
+> **Experimental laboratory branch**
+>
+> This branch is maintained for Downr1n external-nonce laboratory validation. It experiments with a jailbreak-fixed `com.apple.System.boot-nonce` flow so futurerestore can use the APTicket IM4M BNCH as the already-fixed nonce source instead of performing the normal internal fresh-nonce patch path.
+>
+> The local validation build also used the companion `idevicerestore` compatibility patch saved at `patches/idevicerestore-libirecovery-1.3-compat.patch`.
+>
+> This branch is not intended to be merged into, pushed to, or proposed against the official futurerestore upstream/mainline. Treat it as an isolated research branch for controlled local testing only.
+
 __Make sure to read this page before continuing.__
 
 Latest **stable** compiled version can be found [here](https://github.com/futurerestore/futurerestore/releases).
