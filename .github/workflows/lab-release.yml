@@ -25,11 +25,31 @@ jobs:
           fetch-depth: 0
 
       - name: Bootstrap static dependencies
-        run: .github/workflows/mac-bootstrap.sh
+        run: |
+          set -euo pipefail
+          export WORKFLOW_ROOT="${GITHUB_WORKSPACE}/.github/workflows"
+          export DEP_ROOT="${GITHUB_WORKSPACE}/dep_root"
+
+          mkdir -p \
+            "${DEP_ROOT}/macOS_x86_64_Release" \
+            "${DEP_ROOT}/macOS_arm64_Release"
+
+          cd "${WORKFLOW_ROOT}"
+          curl -fsSLO https://cdn.cryptiiiic.com/deps/static/macOS/x86_64/macOS_x86_64_Release_Latest.tar.zst
+          curl -fsSLO https://cdn.cryptiiiic.com/deps/static/macOS/arm64/macOS_arm64_Release_Latest.tar.zst
+
+          rm -rf "${DEP_ROOT}/"{lib,include}
+          gtar xf macOS_x86_64_Release_Latest.tar.zst -C "${DEP_ROOT}/macOS_x86_64_Release"
+          gtar xf macOS_arm64_Release_Latest.tar.zst -C "${DEP_ROOT}/macOS_arm64_Release"
 
       - name: Build release binaries
         run: |
+          set -euo pipefail
           export DEP_ROOT="${GITHUB_WORKSPACE}/dep_root"
+          command -v cmake
+          command -v clang
+          command -v clang++
+          command -v make
 
           ln -sf "${DEP_ROOT}/macOS_x86_64_Release/"{lib/,include/} "${DEP_ROOT}/"
           cmake -DCMAKE_BUILD_TYPE=Release \
@@ -62,6 +82,7 @@ jobs:
 
       - name: Package release archive
         run: |
+          set -euo pipefail
           export FUTURERESTORE_VERSION="$(git rev-list --count HEAD | tr -d '\n')"
           export FUTURERESTORE_VERSION_RELEASE="$(cat version.txt | tr -d '\n')"
           lipo -create \
