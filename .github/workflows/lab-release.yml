@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-15-intel
     env:
       PROCURSUS: /opt/procursus
-      PATH: /opt/procursus/bin:/opt/procursus/libexec/gnubin:/usr/local/lib/ruby/gems/2.7.0/bin:/usr/local/opt/ruby@2.7/bin:/usr/local/opt/pipx_bin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Users/runner/Library/Android/sdk/ndk-bundle:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools:/Users/runner/.ghcup/bin
+      PATH: /opt/procursus/bin:/opt/procursus/libexec/gnubin:/usr/local/bin1:/usr/local/lib/ruby/gems/2.7.0/bin:/usr/local/opt/ruby@2.7/bin:/usr/local/opt/pipx_bin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Users/runner/Library/Android/sdk/ndk-bundle:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools:/Users/runner/.ghcup/bin
 
     steps:
       - name: Checkout
@@ -25,22 +25,7 @@ jobs:
           fetch-depth: 0
 
       - name: Bootstrap static dependencies
-        run: |
-          set -euo pipefail
-          export WORKFLOW_ROOT="${GITHUB_WORKSPACE}/.github/workflows"
-          export DEP_ROOT="${GITHUB_WORKSPACE}/dep_root"
-
-          mkdir -p \
-            "${DEP_ROOT}/macOS_x86_64_Release" \
-            "${DEP_ROOT}/macOS_arm64_Release"
-
-          cd "${WORKFLOW_ROOT}"
-          curl -fsSLO https://cdn.cryptiiiic.com/deps/static/macOS/x86_64/macOS_x86_64_Release_Latest.tar.zst
-          curl -fsSLO https://cdn.cryptiiiic.com/deps/static/macOS/arm64/macOS_arm64_Release_Latest.tar.zst
-
-          rm -rf "${DEP_ROOT}/"{lib,include}
-          gtar xf macOS_x86_64_Release_Latest.tar.zst -C "${DEP_ROOT}/macOS_x86_64_Release"
-          gtar xf macOS_arm64_Release_Latest.tar.zst -C "${DEP_ROOT}/macOS_arm64_Release"
+        run: .github/workflows/mac-bootstrap.sh
 
       - name: Build release binaries
         run: |
