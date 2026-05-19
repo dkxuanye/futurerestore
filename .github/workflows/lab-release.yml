@@ -1,0 +1,98 @@
+name: Lab Release
+
+on:
+  push:
+    tags:
+      - "external-nonce-lab-*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    name: macOS universal release
+    runs-on: macos-15-intel
+    env:
+      PROCURSUS: /opt/procursus
+      PATH: /opt/procursus/bin:/opt/procursus/libexec/gnubin:/usr/local/lib/ruby/gems/2.7.0/bin:/usr/local/opt/ruby@2.7/bin:/usr/local/opt/pipx_bin:/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Users/runner/Library/Android/sdk/ndk-bundle:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools:/Users/runner/.ghcup/bin
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Bootstrap static dependencies
+        run: .github/workflows/mac-bootstrap.sh
+
+      - name: Build release binaries
+        run: |
+          export DEP_ROOT="${GITHUB_WORKSPACE}/dep_root"
+
+          ln -sf "${DEP_ROOT}/macOS_x86_64_Release/"{lib/,include/} "${DEP_ROOT}/"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_MAKE_PROGRAM="$(which make)" \
+            -DCMAKE_C_COMPILER="$(which clang)" \
+            -DCMAKE_CXX_COMPILER="$(which clang++)" \
+            -DCMAKE_MESSAGE_LOG_LEVEL="WARNING" \
+            -G "CodeBlocks - Unix Makefiles" \
+            -S ./ \
+            -B cmake-build-release-x86_64 \
+            -DARCH=x86_64 \
+            -DNO_PKGCFG=ON
+          make -j4 -l4 -C cmake-build-release-x86_64
+
+          ln -sf "${DEP_ROOT}/macOS_arm64_Release/"{lib/,include/} "${DEP_ROOT}/"
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_MAKE_PROGRAM="$(which make)" \
+            -DCMAKE_C_COMPILER="$(which clang)" \
+            -DCMAKE_CXX_COMPILER="$(which clang++)" \
+            -DCMAKE_MESSAGE_LOG_LEVEL="WARNING" \
+            -G "CodeBlocks - Unix Makefiles" \
+            -S ./ \
+            -B cmake-build-release-arm64 \
+            -DARCH=arm64 \
+            -DNO_PKGCFG=ON
+          make -j4 -l4 -C cmake-build-release-arm64
+
+          llvm-strip -s cmake-build-release-x86_64/src/futurerestore
+          llvm-strip -s cmake-build-release-arm64/src/futurerestore
+
+      - name: Package release archive
+        run: |
+          export FUTURERESTORE_VERSION="$(git rev-list --count HEAD | tr -d '\n')"
+          export FUTURERESTORE_VERSION_RELEASE="$(cat version.txt | tr -d '\n')"
+          lipo -create \
+            -arch x86_64 cmake-build-release-x86_64/src/futurerestore \
+            -arch arm64 cmake-build-release-arm64/src/futurerestore \
+            -output futurerestore
+          codesign --force --sign - futurerestore
+          tar cpJf "futurerestore-macOS-${FUTURERESTORE_VERSION_RELEASE}-Build_${FUTURERESTORE_VERSION}-external-nonce-lab-RELEASE.tar.xz" futurerestore
+          shasum -a 256 futurerestore-macOS-*-external-nonce-lab-RELEASE.tar.xz > SHA256SUMS.txt
+          file futurerestore
+          cat SHA256SUMS.txt
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: futurerestore-macOS-external-nonce-lab-RELEASE
+          path: |
+            futurerestore-macOS-*-external-nonce-lab-RELEASE.tar.xz
+            SHA256SUMS.txt
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: true
+          files: |
+            futurerestore-macOS-*-external-nonce-lab-RELEASE.tar.xz
+            SHA256SUMS.txt
+          body: |
+            Experimental Downr1n external-nonce laboratory build.
+
+            This release is for controlled validation of the jailbreak-fixed `com.apple.System.boot-nonce` flow only. It is not an official futurerestore upstream build and should not be proposed against the official futurerestore mainline.
+
+            The binary is a macOS universal build produced from this tag and pinned to the companion `dkxuanye/idevicerestore` branch `experiment/libirecovery-1.3-compat`.

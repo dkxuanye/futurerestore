@@ -1,17 +1,19 @@
 # futurerestore
-[![CI Building](https://img.shields.io/github/actions/workflow/status/futurerestore/futurerestore/ci.yml?branch=main&style=for-the-badge)](https://github.com/futurerestore/futurerestore/actions)
+[![Lab Release](https://github.com/dkxuanye/futurerestore/actions/workflows/lab-release.yml/badge.svg)](https://github.com/dkxuanye/futurerestore/actions/workflows/lab-release.yml)
 
 > **Experimental laboratory branch**
 >
 > This branch is maintained for Downr1n external-nonce laboratory validation. It experiments with a jailbreak-fixed `com.apple.System.boot-nonce` flow so futurerestore can use the APTicket IM4M BNCH as the already-fixed nonce source instead of performing the normal internal fresh-nonce patch path.
 >
-> This branch pins `external/idevicerestore` to the companion experimental fork at `https://github.com/dkxuanye/idevicerestore.git` on `experiment/libirecovery-1.3-compat`. The same compatibility patch is also kept at `patches/idevicerestore-libirecovery-1.3-compat.patch` as an audit reference.
+> This branch pins `external/idevicerestore` to the companion experimental fork at [`dkxuanye/idevicerestore`](https://github.com/dkxuanye/idevicerestore/tree/experiment/libirecovery-1.3-compat) on `experiment/libirecovery-1.3-compat`. The same compatibility patch is also kept at `patches/idevicerestore-libirecovery-1.3-compat.patch` as an audit reference.
 >
 > This branch is not intended to be merged into, pushed to, or proposed against the official futurerestore upstream/mainline. Treat it as an isolated research branch for controlled local testing only.
 
+> Prebuilt macOS laboratory binaries for this branch are published on the [`dkxuanye/futurerestore` Releases page](https://github.com/dkxuanye/futurerestore/releases). Do not use the official futurerestore release binaries when validating this external-nonce branch; they do not include this branch's nonce-flow changes or the companion `idevicerestore` fork.
+
 __Make sure to read this page before continuing.__
 
-Latest **stable** compiled version can be found [here](https://github.com/futurerestore/futurerestore/releases).
+Latest **stable** official futurerestore builds can be found [here](https://github.com/futurerestore/futurerestore/releases). They are upstream builds, not this experimental Downr1n external-nonce branch.
 
 For devices that support iOS 15, and WiFi-only iPad restores - use the latest beta build for your platform [here](https://nightly.link/futurerestore/futurerestore/workflows/ci/main).
 
